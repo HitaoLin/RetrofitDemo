@@ -11,11 +11,14 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String searchTitle;
     List<String> searchTitleList = new ArrayList<>();
 
+    Button bt_login;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +53,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.wanandroid.com/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        api = retrofit.create(Api.class);
 
+        api = retrofit.create(Api.class);
 
 
     }
@@ -62,12 +68,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tv_show = findViewById(R.id.tv_show);
 
+        bt_login = findViewById(R.id.bt_login);
+        bt_login.setOnClickListener(this);
+
     }
 
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.get:
                 Call<Banner> call = api.getBanner();
                 call.enqueue(new Callback<Banner>() {
@@ -82,12 +91,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                         mDataBeans = response.body().getData();
-                        for (int i = 0;i<mDataBeans.size();i++){
+                        for (int i = 0; i < mDataBeans.size(); i++) {
                             title = mDataBeans.get(i).getTitle();
                             titleList.add(title);
                         }
 
-                        Toast.makeText(MainActivity.this, "errorCode:"+errorCode+",errorMsg:"+errorMsg+",title0:"+titleList.get(0), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "errorCode:" + errorCode + ",errorMsg:" + errorMsg + ",title0:" + titleList.get(0), Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -102,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onResponse(Call<HomeArticle> call, Response<HomeArticle> response) {
                         mHomeArticleDatasBeanList = response.body().getData().getDatas();
-                        for (int i = 0;i < mHomeArticleDatasBeanList.size();i++){
+                        for (int i = 0; i < mHomeArticleDatasBeanList.size(); i++) {
                             chapterName = mHomeArticleDatasBeanList.get(i).getChapterName();
                             chapterNameList.add(chapterName);
                         }
@@ -115,16 +124,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
 
-                Call<ProjectList> projectListCall = api.getProjectList(0,"294");
+                Call<ProjectList> projectListCall = api.getProjectList(0, "294");
                 projectListCall.enqueue(new Callback<ProjectList>() {
                     @Override
                     public void onResponse(Call<ProjectList> call, Response<ProjectList> response) {
                         mProjectListDatas = response.body().getData().getDatas();
-                        for (int i = 0;i<mProjectListDatas.size();i++){
+                        for (int i = 0; i < mProjectListDatas.size(); i++) {
                             superChapterName = mProjectListDatas.get(i).getSuperChapterName();
                             superChapterNameList.add(superChapterName);
                         }
-                        tv_show.setText("superChapterName:"+superChapterNameList.get(0));
+                        tv_show.setText("superChapterName:" + superChapterNameList.get(0));
                     }
 
                     @Override
@@ -137,12 +146,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onResponse(Call<Search> call, Response<Search> response) {
                         msearchDataBeans = response.body().getData().getDatas();
-                        for (int i = 0;i< msearchDataBeans.size(); i++){
+                        for (int i = 0; i < msearchDataBeans.size(); i++) {
                             searchTitle = msearchDataBeans.get(i).getTitle();
                             searchTitleList.add(searchTitle);
                         }
 
-                        tv_show.setText("searchTitle:"+searchTitleList.get(0));
+                        tv_show.setText("searchTitle:" + searchTitleList.get(0));
 
                     }
 
@@ -152,8 +161,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
 
+                break;
+
+            case R.id.bt_login:
 
                 break;
+
+
         }
     }
+
 }
